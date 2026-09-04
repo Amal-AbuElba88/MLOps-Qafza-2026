@@ -1,0 +1,5 @@
+--- EDA Findings Summary ---
+1. Train Records Analyzed: 67534
+2. Target Imbalance: 9.03% late orders in train set.
+3. Missing Values: Found in timestamps, freight, and payment columns (handled in Feature Engineering).
+4. Key Insights: Certain states exhibit significantly higher delivery delay rates.
