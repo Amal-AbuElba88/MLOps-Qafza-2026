@@ -1,0 +1,125 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mlops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mlops}
+      POSTGRES_DB: ${POSTGRES_DB:-mlops}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio:
+    image: minio/minio:RELEASE.2024-11-07T00-52-20Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-mlops}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-mlops-development-key}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+  create-buckets:
+    image: minio/mc:RELEASE.2024-11-05T11-29-45Z
+    depends_on:
+      minio:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set storage http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD}; do sleep 1; done;
+      mc mb --ignore-existing storage/mlflow;
+      mc mb --ignore-existing storage/dvc;
+      "
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-mlops}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-mlops-development-key}
+
+  mlflow:
+    build: .
+    command:
+      - /bin/sh
+      - -c
+      - >
+        mlflow server
+        --backend-store-uri postgresql+psycopg2://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@postgres:5432/$${POSTGRES_DB}
+        --artifacts-destination s3://mlflow
+        --host 0.0.0.0
+        --port 5000
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mlops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mlops}
+      POSTGRES_DB: ${POSTGRES_DB:-mlops}
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-mlops}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-mlops-development-key}
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      create-buckets:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  register-model:
+    build: .
+    command: python -m src.register_model
+    environment:
+      MLOPS_MODEL_SOURCE: local
+      MLOPS_MODEL_PATH: /bootstrap/delivery_delay_pipeline_v1.pkl
+      MLOPS_FEATURE_COLUMNS_PATH: /bootstrap/feature_columns_v1.pkl
+      MLOPS_METADATA_PATH: /bootstrap/delivery_delay_model_metadata_v1.json
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-mlops}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-mlops-development-key}
+      MLOPS_DATABASE_ENABLED: "false"
+    volumes:
+      - ./Tasks/Task-02/artifacts:/bootstrap:ro
+    depends_on:
+      mlflow:
+        condition: service_healthy
+
+  api:
+    build: .
+    environment:
+      MLOPS_MODEL_SOURCE: mlflow
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-mlops}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-mlops-development-key}
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-mlops}:${POSTGRES_PASSWORD:-mlops}@postgres:5432/${POSTGRES_DB:-mlops}
+      POSTGRES_USER: ${POSTGRES_USER:-mlops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mlops}
+      POSTGRES_DB: ${POSTGRES_DB:-mlops}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      register-model:
+        condition: service_completed_successfully
+
+  prometheus:
+    image: prom/prometheus:v3.0.1
+    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  minio_data:

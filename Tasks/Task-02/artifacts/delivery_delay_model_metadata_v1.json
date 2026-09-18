@@ -1,0 +1,39 @@
+{
+    "model_name": "Logistic Regression",
+    "model_version": "v1.0",
+    "prediction_task": "delivery_delay_classification",
+    "target_column": "is_late",
+    "decision_threshold": 0.6097192772348367,
+    "feature_columns": [
+        "customer_state",
+        "total_price",
+        "total_freight",
+        "num_items",
+        "num_unique_sellers",
+        "total_payment",
+        "max_installments",
+        "main_payment_type",
+        "purchase_year",
+        "purchase_month",
+        "purchase_dayofweek",
+        "purchase_hour",
+        "is_weekend",
+        "estimated_delivery_days",
+        "freight_ratio"
+    ],
+    "test_metrics": {
+        "model": "Logistic Regression",
+        "threshold": 0.6097192772348367,
+        "accuracy": 0.4653814262023217,
+        "precision": 0.098531501657982,
+        "recall": 0.8693834900731452,
+        "f1_score": 0.17700244654823954,
+        "roc_auc": 0.6863573930587594,
+        "pr_auc": 0.12505114075037707
+    },
+    "training_rows": 82006,
+    "test_rows": 14472,
+    "scikit_learn_version": "1.6.1",
+    "trained_at_utc": "2026-09-17T16:59:59.902476+00:00",
+    "known_limitation": "Temporal concept drift and class imbalance reduce precision across future months."
+}

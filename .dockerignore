@@ -1,0 +1,15 @@
+.git
+.github
+.dvc/cache
+.pytest_cache
+__pycache__
+*.pyc
+*.ipynb
+Tasks/
+data/
+logs/
+mlruns/
+models/versioned/
+.env
+.venv
+tests/

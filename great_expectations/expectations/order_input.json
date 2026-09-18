@@ -1,0 +1,108 @@
+{
+  "expectation_suite_name": "order_input",
+  "data_asset_type": null,
+  "meta": {
+    "purpose": "Validate model-ready delivery prediction features before inference",
+    "validation_failure_action": "reject"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_table_columns_to_match_ordered_list",
+      "kwargs": {
+        "column_list": [
+          "customer_state", "total_price", "total_freight", "num_items",
+          "num_unique_sellers", "total_payment", "max_installments",
+          "main_payment_type", "purchase_year", "purchase_month",
+          "purchase_dayofweek", "purchase_hour", "is_weekend",
+          "estimated_delivery_days", "freight_ratio"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "customer_state",
+        "value_set": [
+          "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+          "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+          "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "main_payment_type",
+        "value_set": ["boleto", "credit_card", "debit_card", "voucher"]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "total_price", "min_value": 0, "max_value": 1000000}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "total_freight", "min_value": 0, "max_value": 1000000}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "num_items", "min_value": 1, "max_value": 10000}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "num_unique_sellers", "min_value": 1, "max_value": 10000}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "total_payment", "min_value": 0, "max_value": 2000000}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "max_installments", "min_value": 0, "max_value": 100}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "purchase_year", "min_value": 2016, "max_value": 2100}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "purchase_month", "min_value": 1, "max_value": 12}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "purchase_dayofweek", "min_value": 0, "max_value": 6}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "purchase_hour", "min_value": 0, "max_value": 23}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {"column": "is_weekend", "value_set": [0, 1]}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "estimated_delivery_days", "min_value": 0, "max_value": 3650}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "freight_ratio", "min_value": 0, "max_value": 1000}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {"column": "customer_state"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {"column": "main_payment_type"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {"column": "estimated_delivery_days"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {"column": "freight_ratio"}
+    }
+  ]
+}

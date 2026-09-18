@@ -1,0 +1,66 @@
+project:
+  name: mlops-delivery-delay
+  version: 1.0.0
+
+paths:
+  artifacts_dir: "Tasks/Task-02/artifacts"
+  models_dir: "models"
+  logs_dir: "logs"
+  log_file: "logs/app.log"
+  expectations_file: "great_expectations/expectations/order_input.json"
+  reference_distribution: "models/reference_distribution.json"
+  versioned_artifacts_dir: "models/versioned"
+
+data:
+  raw_data_path: "data/raw"
+  processed_data_path: "data/processed"
+  training_features_path: "Tasks/Task-02/artifacts/train_features.csv"
+  reference_features_path: "Tasks/Task-02/artifacts/test_features.csv"
+  validation_report_path: "data/validation_report.json"
+
+model:
+  name: "delivery_delay_model"
+  alias: "champion"
+  source: "local"
+  local_model_path: "Tasks/Task-02/artifacts/delivery_delay_pipeline_v1.pkl"
+  feature_columns_path: "Tasks/Task-02/artifacts/feature_columns_v1.pkl"
+  metadata_path: "Tasks/Task-02/artifacts/delivery_delay_model_metadata_v1.json"
+  threshold: 0.6097192772348367
+  feature_columns:
+    - customer_state
+    - total_price
+    - total_freight
+    - num_items
+    - num_unique_sellers
+    - total_payment
+    - max_installments
+    - main_payment_type
+    - purchase_year
+    - purchase_month
+    - purchase_dayofweek
+    - purchase_hour
+    - is_weekend
+    - estimated_delivery_days
+    - freight_ratio
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  max_batch_size: 1000
+
+database:
+  enabled: true
+  url: "sqlite:///data/predictions.db"
+
+mlflow:
+  tracking_uri: "http://localhost:5000"
+  experiment_name: "delivery-delay-inference"
+
+logging:
+  level: "INFO"
+
+monitoring:
+  drift_minimum_samples: 20
+  drift_psi_threshold: 0.20
+  error_rate_alert_threshold: 0.05
+  latency_alert_seconds: 1.0

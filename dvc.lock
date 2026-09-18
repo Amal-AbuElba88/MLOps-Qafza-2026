@@ -1,0 +1,51 @@
+schema: '2.0'
+stages:
+  validate_training_data:
+    cmd: python -m src.validate_training_data
+    deps:
+    - path: Tasks/Task-02/artifacts/train_features.csv
+      hash: md5
+      md5: d368defa1d44051846f44c4d53b5bc71
+      size: 6067394
+    - path: config/config.yaml
+      hash: md5
+      md5: 8d1c6e5f8e9662b4bb913e7b51b19858
+      size: 1688
+    - path: src/validate_training_data.py
+      hash: md5
+      md5: 71f882431dd1f720ca0a95371231586a
+      size: 1665
+    outs:
+    - path: data/validation_report.json
+      hash: md5
+      md5: 821458852c576658514dfe0a2b5d5990
+      size: 221
+  package_model_artifacts:
+    cmd: python -m src.package_artifacts
+    deps:
+    - path: Tasks/Task-02/artifacts/delivery_delay_model_metadata_v1.json
+      hash: md5
+      md5: d7ba6679141acf113edd92f3ec4bdc08
+      size: 1272
+    - path: Tasks/Task-02/artifacts/delivery_delay_pipeline_v1.pkl
+      hash: md5
+      md5: 4521b7c55ef4ac87f8a6d2628a518e24
+      size: 5898
+    - path: Tasks/Task-02/artifacts/feature_columns_v1.pkl
+      hash: md5
+      md5: 75232f0f326f39fdb76133cf71b3a5c8
+      size: 276
+    - path: config/config.yaml
+      hash: md5
+      md5: 8d1c6e5f8e9662b4bb913e7b51b19858
+      size: 1688
+    - path: src/package_artifacts.py
+      hash: md5
+      md5: e8c427b50000b5f2d19551bf1172a17f
+      size: 567
+    outs:
+    - path: models/versioned
+      hash: md5
+      md5: 606bce2c9598832d4fa443d8e34044b9.dir
+      size: 7446
+      nfiles: 3

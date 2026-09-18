@@ -1,0 +1,20 @@
+stages:
+  package_model_artifacts:
+    cmd: python -m src.package_artifacts
+    deps:
+      - config/config.yaml
+      - src/package_artifacts.py
+      - Tasks/Task-02/artifacts/delivery_delay_pipeline_v1.pkl
+      - Tasks/Task-02/artifacts/delivery_delay_model_metadata_v1.json
+      - Tasks/Task-02/artifacts/feature_columns_v1.pkl
+    outs:
+      - models/versioned
+  validate_training_data:
+    cmd: python -m src.validate_training_data
+    deps:
+      - config/config.yaml
+      - src/validate_training_data.py
+      - Tasks/Task-02/artifacts/train_features.csv
+    metrics:
+      - data/validation_report.json:
+          cache: false
